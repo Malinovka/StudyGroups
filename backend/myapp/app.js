@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+var db = require("./database/database.js")
 const port = 8000
 
 app.get('/', (req, res) => {
