@@ -1,6 +1,7 @@
 DROP TABLE USERS;
 DROP TABLE STUDYGROUP;
 DROP TABLE COURSE;
+DROP TABLE MAJORS;
 
 
 CREATE TABLE USERS
@@ -25,6 +26,13 @@ CREATE TABLE COURSE
     CourseNumber INTEGER(4),
     DeptName VARCHAR(5)
 );
+
+CREATE TABLE MAJORS
+(
+    Name VARCHAR(50) PRIMARY KEY,
+    FacultyName VARCHAR(50)
+);
+
 
 INSERT INTO USERS (FirstName, LastName, Username, Password, Email)
 VALUES ('John', 'Doe', 'johndoe', 'password123', 'john.doe@gmail.com');
@@ -68,3 +76,14 @@ VALUES ('Web Development', 210, 'CPSC');
 INSERT INTO COURSE (Name, CourseNumber, DeptName)
 VALUES ('Machine Learning', 340, 'CPSC');
 
+INSERT INTO MAJORS (Name, FacultyName)
+VALUES ('Computer Science', 'Faculty of Science');
+
+INSERT INTO MAJORS (Name, FacultyName)
+VALUES ('Mathematics', 'Faculty of Science');
+
+INSERT INTO MAJORS (Name, FacultyName)
+VALUES ('History', 'Faculty of Arts');
+
+INSERT INTO MAJORS (Name, FacultyName)
+VALUES ('Economics', 'Faculty of Arts');
