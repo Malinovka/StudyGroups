@@ -1,4 +1,7 @@
 DROP TABLE USERS;
+DROP TABLE STUDYGROUP;
+DROP TABLE COURSE;
+
 
 CREATE TABLE USERS
 (
@@ -7,6 +10,20 @@ CREATE TABLE USERS
     Username VARCHAR(50) PRIMARY KEY,
     Password VARCHAR(40),
     Email VARCHAR(100)
+);
+
+CREATE TABLE STUDYGROUP
+(
+    Name VARCHAR(50) PRIMARY KEY,
+    MemberLimit INTEGER(4),
+    OwnerUsername VARCHAR(50)
+);
+
+CREATE TABLE COURSE
+(
+    Name VARCHAR(50) PRIMARY KEY,
+    CourseNumber INTEGER(4),
+    DeptName VARCHAR(5)
 );
 
 INSERT INTO USERS (FirstName, LastName, Username, Password, Email)
@@ -20,4 +37,34 @@ VALUES ('Alex', 'Johnson', 'alexj', 'alexJ789', 'alex.johnson@hotmail.com');
 
 INSERT INTO USERS (FirstName, LastName, Username, Password, Email)
 VALUES ('Emily', 'Brown', 'emilyb', 'brownPass001', 'emily.brown@outlook.com');
+
+INSERT INTO STUDYGROUP (Name, MemberLimit, OwnerUsername)
+VALUES ('Data Science Enthusiasts', 10, 'emilyb');
+
+INSERT INTO STUDYGROUP (Name, MemberLimit, OwnerUsername)
+VALUES ('AI and Machine Learning', 15, 'alexj');
+
+INSERT INTO STUDYGROUP (Name, MemberLimit, OwnerUsername)
+VALUES ('Web Development Wizards', 12, 'janesmith');
+
+INSERT INTO STUDYGROUP (Name, MemberLimit, OwnerUsername)
+VALUES ('Cybersecurity Experts', 8, 'emilyb');
+
+INSERT INTO STUDYGROUP (Name, MemberLimit, OwnerUsername)
+VALUES ('CPSC 304 Study Buddies', 20, 'johndoe');
+
+INSERT INTO COURSE (Name, CourseNumber, DeptName)
+VALUES ('Introduction to differential calculus', 100, 'MATH');
+
+INSERT INTO COURSE (Name, CourseNumber, DeptName)
+VALUES ('Intro to Literature', 110, 'ENGL');
+
+INSERT INTO COURSE (Name, CourseNumber, DeptName)
+VALUES ('Database Systems', 304, 'CPSC');
+
+INSERT INTO COURSE (Name, CourseNumber, DeptName)
+VALUES ('Web Development', 210, 'CPSC');
+
+INSERT INTO COURSE (Name, CourseNumber, DeptName)
+VALUES ('Machine Learning', 340, 'CPSC');
 
