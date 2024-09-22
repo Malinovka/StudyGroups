@@ -1,14 +1,14 @@
 const express = require('express')
 const app = express()
-var db = require("./database/database.js")
-const port = 8001
+var db = require("./database.js")
+const port = 8000
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
 app.get("/api/users", (req, res, next) => {
-    var sql = "SELECT * FROM user"
+    var sql = "SELECT * FROM USERS"
     var params = []
     db.all(sql, params, (err, rows) => {
         if (err) {
