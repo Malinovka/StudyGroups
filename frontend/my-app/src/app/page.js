@@ -18,9 +18,6 @@ const App = () => {
             <div className="main">
                 <ChatBox messages={messages} onSendMessage={handleSendMessage} />
             </div>
-            <footer className="footer">
-                <p>Powered by Next.js</p>
-            </footer>
         </div>
     );
 };
