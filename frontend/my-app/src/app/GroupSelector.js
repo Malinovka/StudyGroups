@@ -8,6 +8,7 @@ const GroupList = ({ groups, onGroupSelect }) => {
     setSelectedGroup(group); // Update the local state
     onGroupSelect(group);    // Notify the parent component
   };
+
   console.log('Groups:', groups);
   console.log('onGroupSelect Function:', onGroupSelect);
   return (
@@ -21,6 +22,8 @@ const GroupList = ({ groups, onGroupSelect }) => {
               cursor: 'pointer',
               padding: '8px',
               backgroundColor: selectedGroup === group ? '#e0f7fa' : 'transparent',
+              color: selectedGroup === group ? 'black' : 'white', // Change font color when selected
+              transition: 'background-color 0.3s, color 0.3s', // Smooth transition
             }}
           >
             {group.name}
