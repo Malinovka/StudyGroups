@@ -1,9 +1,12 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser'); // Needed for parsing JSON body
+
 var db = require("./database.js")
 const port = 8000
 const cors = require('cors');
 app.use(cors());
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -68,7 +71,32 @@ app.get("/api/majors", (req, res, next) => {
         })
     });
 });
-// app.post("api/groups")
+
+app.post("/api/groups", (req, res) => {
+    const { name, owner, memberLimit } = req.body;
+
+    if (!name || !owner || !memberLimit) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    var sql = `INSERT INTO STUDYGROUP (Name, OwnerUsername, MemberLimit) VALUES (?, ?, ?)`;
+    var params = [name, owner, memberLimit];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({
+            message: "Group created successfully",
+            group: {
+                id: this.lastID,  // Return newly created ID
+                name,
+                owner,
+                memberLimit
+            }
+        });
+    });
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
