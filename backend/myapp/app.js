@@ -98,6 +98,31 @@ app.post("/api/groups", (req, res) => {
     });
 });
 
+app.delete("/api/groups/:name", (req, res) => {
+    const groupName = req.params.name;
+    console.log(`Received DELETE request for group: ${groupName}`);
+    // Run the DELETE query on the STUDYGROUP table
+    db.run(
+        'DELETE FROM STUDYGROUP WHERE Name = ?',
+        [groupName],
+        function (err) {
+            if (err) {
+                res.status(500).json({ error: err.message });  // Server error
+                return;
+            }
+
+            if (this.changes === 0) {
+                // No group was deleted (group with this Name doesn't exist)
+                res.status(404).json({ message: `Group with Name '${groupName}' not found.` });
+                return;
+            }
+
+            // Group was successfully deleted
+            res.status(200).json({ message: `Group with Name '${groupName}' deleted successfully.` });
+        }
+    );
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-})
+});
