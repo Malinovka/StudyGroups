@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 var db = require("./database.js")
 const port = 8000
+const cors = require('cors');
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -66,7 +68,7 @@ app.get("/api/majors", (req, res, next) => {
         })
     });
 });
-
+// app.post("api/groups")
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
