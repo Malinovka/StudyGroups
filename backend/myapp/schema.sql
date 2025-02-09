@@ -2,7 +2,9 @@ DROP TABLE USERS;
 DROP TABLE STUDYGROUP;
 DROP TABLE COURSE;
 DROP TABLE MAJORS;
-
+DROP TABLE RequestType;
+DROP TABLE RequestStatus;
+DROP TABLE Request;
 
 CREATE TABLE USERS
 (
@@ -31,6 +33,28 @@ CREATE TABLE MAJORS
 (
     Name VARCHAR(50) PRIMARY KEY,
     FacultyName VARCHAR(50)
+);
+
+CREATE TABLE RequestType (
+--                              RequestTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
+                             Type TEXT NOT NULL -- Example values: 'JoinGroup', 'StartConversation'
+);
+
+CREATE TABLE RequestStatus (
+                              -- StatusId INTEGER PRIMARY KEY AUTOINCREMENT,
+                               Status TEXT NOT NULL
+);
+
+CREATE TABLE Request (
+                         RequestId INTEGER PRIMARY KEY AUTOINCREMENT,
+                         RequestTypeId INTEGER NOT NULL,
+                         RecipientUserId INTEGER NOT NULL,
+                         SenderUserId INTEGER NOT NULL,
+                         StatusId INTEGER NOT NULL,
+                         GroupId INTEGER NOT NULL,
+                         Message TEXT,
+                         FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
+                         FOREIGN KEY (StatusId) REFERENCES RequestStatus(StatusId)
 );
 
 
