@@ -22,7 +22,7 @@ const GroupList = ({ groups, onGroupSelect }) => {
               cursor: 'pointer',
               padding: '8px',
               backgroundColor: selectedGroup === group ? '#e0f7fa' : 'transparent',
-              color: selectedGroup === group ? 'black' : 'white', // Change font color when selected
+              //color: selectedGroup === group ? 'black' : 'black', // Change font color when selected
               transition: 'background-color 0.3s, color 0.3s', // Smooth transition
             }}
           >
