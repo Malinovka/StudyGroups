@@ -98,6 +98,54 @@ app.post("/api/groups", (req, res) => {
     });
 });
 
+app.patch("/api/groups/:name", (req, res) => {
+    const groupName = req.params.name;
+    const { newName, owner, memberLimit } = req.body;
+
+    db.get("SELECT * FROM STUDYGROUP WHERE Name = ?", [groupName], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            return res.status(404).json({ error: "Group not found" });
+        }
+
+        const updatedName = newName || row.Name;
+        const updatedOwner = owner || row.OwnerUsername;
+        const updatedMemberLimit = memberLimit || row.MemberLimit;
+
+        if (updatedName === row.Name && updatedOwner === row.OwnerUsername && updatedMemberLimit === row.MemberLimit) {
+            return res.status(200).json({
+                message: "No changes made",
+                group: {
+                    name: updatedName,
+                    owner: updatedOwner,
+                    memberLimit: updatedMemberLimit
+                },
+                changes: 0
+            });
+        }
+
+        const sql = `UPDATE STUDYGROUP SET Name = ?, OwnerUsername = ?, MemberLimit = ? WHERE Name = ?`;
+        const params = [updatedName, updatedOwner, updatedMemberLimit, groupName];
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({
+                message: "Group updated successfully",
+                group: {
+                    name: updatedName,
+                    owner: updatedOwner,
+                    memberLimit: updatedMemberLimit
+                },
+                changes: this.changes
+            });
+        });
+    });
+});
+
 app.delete("/api/groups/:name", (req, res) => {
     const groupName = req.params.name;
     console.log(`Received DELETE request for group: ${groupName}`);
