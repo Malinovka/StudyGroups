@@ -1,7 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 
 const GroupList = ({ groups, onGroupSelect }) => {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(darkModeQuery.matches);
+
+    const handleChange = (e) => setIsDarkMode(e.matches);
+    darkModeQuery.addEventListener('change', handleChange);
+
+    return () => darkModeQuery.removeEventListener('change', handleChange);
+  }, []);
+
 
   const handleGroupClick = (group) => {
     console.log('Selected Group:', group);
@@ -22,7 +34,9 @@ const GroupList = ({ groups, onGroupSelect }) => {
               cursor: 'pointer',
               padding: '8px',
               backgroundColor: selectedGroup === group ? '#e0f7fa' : 'transparent',
-              //color: selectedGroup === group ? 'black' : 'black', // Change font color when selected
+              color: selectedGroup === group 
+              ? 'black' 
+              : (isDarkMode ? 'white' : 'black'),
               transition: 'background-color 0.3s, color 0.3s', // Smooth transition
             }}
           >
