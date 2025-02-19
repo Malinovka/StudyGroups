@@ -5,6 +5,7 @@ DROP TABLE MAJORS;
 DROP TABLE RequestType;
 DROP TABLE RequestStatus;
 DROP TABLE Request;
+DROP TABLE UserGroups
 
 CREATE TABLE USERS
 (
@@ -36,17 +37,17 @@ CREATE TABLE MAJORS
 );
 
 CREATE TABLE RequestType (
---                              RequestTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
+                             RequestTypeId SERIAL PRIMARY KEY,
                              Type TEXT NOT NULL -- Example values: 'JoinGroup', 'StartConversation'
 );
 
 CREATE TABLE RequestStatus (
-                              -- StatusId INTEGER PRIMARY KEY AUTOINCREMENT,
+                               StatusId SERIAL PRIMARY KEY,
                                Status TEXT NOT NULL
 );
 
 CREATE TABLE Request (
-                         RequestId INTEGER PRIMARY KEY AUTOINCREMENT,
+                         RequestId SERIAL PRIMARY KEY,
                          RequestTypeId INTEGER NOT NULL,
                          RecipientUserId INTEGER NOT NULL,
                          SenderUserId INTEGER NOT NULL,
@@ -54,7 +55,16 @@ CREATE TABLE Request (
                          GroupId INTEGER NOT NULL,
                          Message TEXT,
                          FOREIGN KEY (RequestTypeId) REFERENCES RequestType(RequestTypeId),
-                         FOREIGN KEY (StatusId) REFERENCES RequestStatus(StatusId)
+                         FOREIGN KEY (StatusId) REFERENCES RequestStatus(StatusId),
+                         FOREIGN KEY (SenderUserId) REFERENCES USERS(Username)
+);
+
+CREATE TABLE UserGroups (
+                         Username VARCHAR(50) NOT NULL,
+                         Name VARCHAR(50) NOT NULL,
+                         PRIMARY KEY (Username, Name),
+                         FOREIGN KEY (Username) REFERENCES USERS(Username),
+                         FOREIGN KEY (Name) REFERENCES STUDYGROUP(Name)
 );
 
 
@@ -111,3 +121,24 @@ VALUES ('History', 'Faculty of Arts');
 
 INSERT INTO MAJORS (Name, FacultyName)
 VALUES ('Economics', 'Faculty of Arts');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('johndoe', 'CPSC 304 Study Buddies');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('johndoe', 'Web Development Wizards');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('janesmith', 'AI and Machine Learning');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('janesmith', 'Web Development Wizards');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('alexj', 'Data Science Enthusiasts');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('emilyb', 'Cybersecurity Experts');
+
+INSERT INTO UserGroups (Username, Name)
+VALUES ('emilyb', 'Data Science Enthusiasts');
