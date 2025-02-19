@@ -100,69 +100,121 @@ app.post("/api/groups", (req, res) => {
         });
     });
 });
-app.post("/api/register",(req, res)=>{
-    const {firstname, lastname,username, password, email} = req.body;
-    if (!firstname || !lastname || !username || !password || !email){
-        return res.status(400).json({error : "Missing Required fields" });
+
+// app.post("/api/register",(req, res)=>{
+//     const {firstname, lastname,username, password, email} = req.body;
+//     if (!firstname || !lastname || !username || !password || !email){
+//         return res.status(400).json({error : "Missing Required fields" });
+//     }
+//     let hashedPassword = "";
+
+// // Encryption of the string password
+//     bcrypt.genSalt(10, function (err, Salt) {
+
+//         // The bcrypt is used for encrypting password.
+//         bcrypt.hash(password, Salt, function (err, hash) {
+
+//             if (err) {
+//                 return console.log('Cannot encrypt');
+//             }
+
+//             hashedPassword = hash;
+//             console.log(hash);
+
+//             bcrypt.compare(password, hashedPassword,
+//                 async function (err, isMatch) {
+
+//                     // Comparing the original password to
+//                     // encrypted password
+//                     if (isMatch) {
+//                         console.log('Encrypted password is: ', password);
+//                         console.log('Decrypted password is: ', hashedPassword);
+//                     }
+
+//                     if (!isMatch) {
+
+//                         // If password doesn't match the following
+//                         // message will be sent
+//                         console.log(hashedPassword + ' is not encryption of '
+//                             + password);
+//                     }
+//                 })
+//         })
+//     })
+//     var check = 'SELECT * FROM USERS WHERE Username = ?'
+//     db.get(check, [username], (err,row) =>{
+//         if (row){
+//             res.status(404).json({error:"Duplicate Username"});
+//         }
+//     })
+//     var sql = 'INSERT INTO USERS (FirstName, LastName, Username, Password, Email) VALUES (?,?,?,?,?)';
+//     var params = [firstname,lastname, username, hashedPassword,email];
+//     db.run(sql, params, function (err) {
+//         if (err){
+//             res.status(500).json({error: err.message});
+//         }
+//         res.status(201).json({
+//             message:"User created successfully",
+//             user: {
+//                 firstname,
+//                 lastname,
+//                 username,
+//                 email
+//             }
+//         })
+//     })
+
+// });
+
+app.post("/api/register", async (req, res) => {
+    const { firstname, lastname, username, password, email } = req.body;
+
+    if (!firstname || !lastname || !username || !password || !email) {
+        return res.status(400).json({ error: "Missing required fields" });
     }
-    let hashedPassword = "";
 
-// Encryption of the string password
-    bcrypt.genSalt(10, function (err, Salt) {
-
-        // The bcrypt is used for encrypting password.
-        bcrypt.hash(password, Salt, function (err, hash) {
-
+    try {
+        // Check if username already exists
+        db.get("SELECT * FROM USERS WHERE Username = ?", [username], async (err, row) => {
             if (err) {
-                return console.log('Cannot encrypt');
+                return res.status(500).json({ error: "Database error" });
+            }
+            if (row) {
+                return res.status(400).json({ error: "Duplicate username" });
             }
 
-            hashedPassword = hash;
-            console.log(hash);
+            // Hash the password
+            const saltRounds = 10;
+            bcrypt.hash(password, saltRounds, (err, hashedPassword) => {
+                if (err) {
+                    return res.status(500).json({ error: "Error hashing password" });
+                }
 
-            bcrypt.compare(password, hashedPassword,
-                async function (err, isMatch) {
+                console.log("Hashed Password:", hashedPassword);
 
-                    // Comparing the original password to
-                    // encrypted password
-                    if (isMatch) {
-                        console.log('Encrypted password is: ', password);
-                        console.log('Decrypted password is: ', hashedPassword);
+                // Insert user into database
+                const sql = "INSERT INTO USERS (FirstName, LastName, Username, Password, Email) VALUES (?, ?, ?, ?, ?)";
+                const params = [firstname, lastname, username, hashedPassword, email];
+
+                db.run(sql, params, function (err) {
+                    if (err) {
+                        return res.status(500).json({ error: err.message });
                     }
-
-                    if (!isMatch) {
-
-                        // If password doesn't match the following
-                        // message will be sent
-                        console.log(hashedPassword + ' is not encryption of '
-                            + password);
-                    }
-                })
-        })
-    })
-    var check = 'SELECT * FROM USERS WHERE Username = ?'
-    db.get(check, [username], (err,row) =>{
-        if (row){
-            res.status(400).json({error:"Duplicate Username"});
-        }
-    })
-    var sql = 'INSERT INTO USERS (FirstName, LastName, Username, Password, Email) VALUES (?,?,?,?,?)';
-    var params = [firstname,lastname, username, hashedPassword,email];
-    db.run(sql, params, function (err) {
-        if (err){
-            res.status(500).json({error: err.message});
-        }
-        res.status(201).json({
-            message:"User created successfully",
-            user: {
-                firstname,
-                lastname,
-                username,
-                email
-            }
-        })
-    })
-
+                    res.status(201).json({
+                        message: "User created successfully",
+                        user: {
+                            firstname,
+                            lastname,
+                            username,
+                            email
+                        }
+                    });
+                });
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 app.patch("/api/groups/:name", (req, res) => {
@@ -295,31 +347,39 @@ const SECRET_KEY = "mysecretkey";
 app.post("/login", (req, res) => {
     const { username, password } = req.body;
 
-    // Check if both fields are provided
     if (!username || !password) {
         return res.status(400).json({ error: "Username and password are required" });
     }
 
-    // Query user from database
     db.get("SELECT * FROM USERS WHERE Username = ?", [username], (err, user) => {
         if (err) {
+            console.error("Database Error:", err);
             return res.status(500).json({ error: "Database error" });
         }
         if (!user) {
+            console.error("User not found");
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
-        // Verify password (In a real app, use hashed passwords with bcrypt)
-        if (user.Password !== password) {
-            return res.status(401).json({ error: "Invalid username or password" });
-        }
+        console.log("Stored Password:", user.Password);
+        console.log("Entered Password:", password);
 
-        // Generate JWT Token
-        jwt.sign({ id: user.Username, email: user.Email }, SECRET_KEY, { expiresIn: "1h" }, (err, token) => {
+        // Compare hashed password with entered password
+        bcrypt.compare(password, user.Password, (err, isMatch) => {
             if (err) {
-                return res.status(500).json({ error: "Failed to generate token" });
+                return res.status(500).json({ error: "Error verifying password" });
             }
-            res.json({ token });
+            if (!isMatch) {
+                return res.status(401).json({ error: "Invalid username or password" });
+            }
+
+            // Generate JWT Token
+            jwt.sign({ id: user.Username, email: user.Email }, SECRET_KEY, { expiresIn: "1h" }, (err, token) => {
+                if (err) {
+                    return res.status(500).json({ error: "Failed to generate token" });
+                }
+                res.json({ token });
+            });
         });
     });
 });
