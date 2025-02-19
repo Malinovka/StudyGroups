@@ -12,7 +12,7 @@ CREATE TABLE USERS
     FirstName VARCHAR(50),
     LastName VARCHAR(50),
     Username VARCHAR(50) PRIMARY KEY,
-    Password VARCHAR(40),
+    Password VARCHAR(100),
     Email VARCHAR(100)
 );
 
