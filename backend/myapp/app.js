@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser'); // Needed for parsing JSON body
+const jwt = require("jsonwebtoken");
 
 var db = require("./database.js")
 const port = 8000
@@ -221,6 +222,68 @@ app.delete("/api/groups/:name", (req, res) => {
         }
     );
 });
+
+const SECRET_KEY = "mysecretkey";
+
+// Login Endpoint (POST /login)
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
+
+    // Check if both fields are provided
+    if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+    }
+
+    // Query user from database
+    db.get("SELECT * FROM USERS WHERE Username = ?", [username], (err, user) => {
+        if (err) {
+            return res.status(500).json({ error: "Database error" });
+        }
+        if (!user) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        // Verify password (In a real app, use hashed passwords with bcrypt)
+        if (user.Password !== password) {
+            return res.status(401).json({ error: "Invalid username or password" });
+        }
+
+        // Generate JWT Token
+        jwt.sign({ id: user.Username, email: user.Email }, SECRET_KEY, { expiresIn: "1h" }, (err, token) => {
+            if (err) {
+                return res.status(500).json({ error: "Failed to generate token" });
+            }
+            res.json({ token });
+        });
+    });
+});
+
+// Protected Route Example (Requires Token)
+app.get("/protected", verifyToken, (req, res) => {
+    jwt.verify(req.token, SECRET_KEY, (err, authData) => {
+        if (err) {
+            return res.sendStatus(403);
+        } else {
+            res.json({
+                message: "This is a protected route",
+                authData
+            });
+        }
+    });
+});
+
+// Token Verification Middleware
+function verifyToken(req, res, next) {
+    const bearerHeader = req.headers["authorization"];
+    if (typeof bearerHeader !== "undefined") {
+        const bearerToken = bearerHeader.split(" ")[1];
+        req.token = bearerToken;
+        next();
+    } else {
+        res.sendStatus(403);
+    }
+}
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
