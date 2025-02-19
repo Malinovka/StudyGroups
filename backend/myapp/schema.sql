@@ -5,7 +5,7 @@ DROP TABLE MAJORS;
 DROP TABLE RequestType;
 DROP TABLE RequestStatus;
 DROP TABLE Request;
-DROP TABLE UserGroups
+DROP TABLE UserGroups;
 
 CREATE TABLE USERS
 (
