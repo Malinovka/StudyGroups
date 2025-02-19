@@ -92,3 +92,19 @@
 .chat-send-button:hover {
     background-color: var(--button-primary-hover);
 }
+
+/* Light mode styles */
+@media (prefers-color-scheme: light) {
+    .group-item {
+      color: black;
+      background-color: white;
+    }
+  }
+  
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .group-item {
+      color: white;
+      background-color: #121212;
+    }
+  }
