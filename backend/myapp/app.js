@@ -1,7 +1,9 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser'); // Needed for parsing JSON body
+const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+
 
 var db = require("./database.js")
 const port = 8000
@@ -97,6 +99,70 @@ app.post("/api/groups", (req, res) => {
             }
         });
     });
+});
+app.post("/api/register",(req, res)=>{
+    const {firstname, lastname,username, password, email} = req.body;
+    if (!firstname || !lastname || !username || !password || !email){
+        return res.status(400).json({error : "Missing Required fields" });
+    }
+    let hashedPassword = "";
+
+// Encryption of the string password
+    bcrypt.genSalt(10, function (err, Salt) {
+
+        // The bcrypt is used for encrypting password.
+        bcrypt.hash(password, Salt, function (err, hash) {
+
+            if (err) {
+                return console.log('Cannot encrypt');
+            }
+
+            hashedPassword = hash;
+            console.log(hash);
+
+            bcrypt.compare(password, hashedPassword,
+                async function (err, isMatch) {
+
+                    // Comparing the original password to
+                    // encrypted password
+                    if (isMatch) {
+                        console.log('Encrypted password is: ', password);
+                        console.log('Decrypted password is: ', hashedPassword);
+                    }
+
+                    if (!isMatch) {
+
+                        // If password doesn't match the following
+                        // message will be sent
+                        console.log(hashedPassword + ' is not encryption of '
+                            + password);
+                    }
+                })
+        })
+    })
+    var check = 'SELECT * FROM USERS WHERE Username = ?'
+    db.get(check, [username], (err,row) =>{
+        if (row){
+            res.status(400).json({error:"Duplicate Username"});
+        }
+    })
+    var sql = 'INSERT INTO USERS (FirstName, LastName, Username, Password, Email) VALUES (?,?,?,?,?)';
+    var params = [firstname,lastname, username, hashedPassword,email];
+    db.run(sql, params, function (err) {
+        if (err){
+            res.status(500).json({error: err.message});
+        }
+        res.status(201).json({
+            message:"User created successfully",
+            user: {
+                firstname,
+                lastname,
+                username,
+                email
+            }
+        })
+    })
+
 });
 
 app.patch("/api/groups/:name", (req, res) => {
