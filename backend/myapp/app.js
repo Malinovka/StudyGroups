@@ -211,6 +211,56 @@ app.patch("/api/groups/:name", (req, res) => {
     });
 });
 
+app.patch("/api/users/:username", (req, res) => {
+    const userName = req.params.username;
+    const { newFirstName, newLastName, newPassword, newEmail } = req.body;
+
+    db.get("SELECT * FROM USERS WHERE Username = ?", [userName], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const updatedFirstName = newFirstName || row.FirstName;
+        const updatedLastName = newLastName || row.LastName;
+        const updatedPassword = newPassword || row.Password;
+        const updatedEmail = newEmail || row.Email;
+
+        if (updatedFirstName === row.FirstName && updatedLastName === row.LastName && updatedPassword === row.Password && updatedEmail === row.Email) {
+            return res.status(200).json({
+                message: "No changes made",
+                users: {
+                    FirstName: updatedFirstName,
+                    LastName: updatedLastName,
+                    Password: updatedPassword,
+                    Email: updatedEmail
+                },
+                changes: 0
+            });
+        }
+
+        const sql = `UPDATE USERS SET FirstName = ?, LastName = ?, Password = ?, Email = ? WHERE Username = ?`;
+        const params = [updatedFirstName, updatedLastName, updatedPassword, updatedEmail, userName];
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                return res.status(400).json({ error: err.message });
+            }
+            res.status(200).json({
+                message: "User updated successfully",
+                users: {
+                    FirstName: updatedFirstName,
+                    LastName: updatedLastName,
+                    Password: updatedPassword,
+                    Email: updatedEmail
+                },
+                changes: this.changes
+            });
+        });
+    });
+});
 
 app.delete("/api/groups/:name", (req, res) => {
     const groupName = req.params.name;
