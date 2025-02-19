@@ -4,7 +4,6 @@ const bodyParser = require('body-parser'); // Needed for parsing JSON body
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 
-
 var db = require("./database.js")
 const port = 8000
 const cors = require('cors');
@@ -100,71 +99,6 @@ app.post("/api/groups", (req, res) => {
         });
     });
 });
-
-// app.post("/api/register",(req, res)=>{
-//     const {firstname, lastname,username, password, email} = req.body;
-//     if (!firstname || !lastname || !username || !password || !email){
-//         return res.status(400).json({error : "Missing Required fields" });
-//     }
-//     let hashedPassword = "";
-
-// // Encryption of the string password
-//     bcrypt.genSalt(10, function (err, Salt) {
-
-//         // The bcrypt is used for encrypting password.
-//         bcrypt.hash(password, Salt, function (err, hash) {
-
-//             if (err) {
-//                 return console.log('Cannot encrypt');
-//             }
-
-//             hashedPassword = hash;
-//             console.log(hash);
-
-//             bcrypt.compare(password, hashedPassword,
-//                 async function (err, isMatch) {
-
-//                     // Comparing the original password to
-//                     // encrypted password
-//                     if (isMatch) {
-//                         console.log('Encrypted password is: ', password);
-//                         console.log('Decrypted password is: ', hashedPassword);
-//                     }
-
-//                     if (!isMatch) {
-
-//                         // If password doesn't match the following
-//                         // message will be sent
-//                         console.log(hashedPassword + ' is not encryption of '
-//                             + password);
-//                     }
-//                 })
-//         })
-//     })
-//     var check = 'SELECT * FROM USERS WHERE Username = ?'
-//     db.get(check, [username], (err,row) =>{
-//         if (row){
-//             res.status(404).json({error:"Duplicate Username"});
-//         }
-//     })
-//     var sql = 'INSERT INTO USERS (FirstName, LastName, Username, Password, Email) VALUES (?,?,?,?,?)';
-//     var params = [firstname,lastname, username, hashedPassword,email];
-//     db.run(sql, params, function (err) {
-//         if (err){
-//             res.status(500).json({error: err.message});
-//         }
-//         res.status(201).json({
-//             message:"User created successfully",
-//             user: {
-//                 firstname,
-//                 lastname,
-//                 username,
-//                 email
-//             }
-//         })
-//     })
-
-// });
 
 app.post("/api/register", async (req, res) => {
     const { firstname, lastname, username, password, email } = req.body;
@@ -398,17 +332,32 @@ app.get("/protected", verifyToken, (req, res) => {
     });
 });
 
+app.get("/api/profile", verifyToken, (req, res) => {
+    res.json({
+        message: "Welcome to your profile",
+        user: req.user  // This contains decoded JWT user data
+    });
+});
+
 // Token Verification Middleware
 function verifyToken(req, res, next) {
-    const bearerHeader = req.headers["authorization"];
-    if (typeof bearerHeader !== "undefined") {
-        const bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    } else {
-        res.sendStatus(403);
+    const authHeader = req.header('Authorization');
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Access denied. No token provided." });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        req.user = decoded; // Store decoded user details in req.user
+        next(); // Proceed to the next middleware/route
+    } catch (error) {
+        return res.status(401).json({ error: "Access denied. Invalid token." });
     }
 }
+module.exports = verifyToken;
 
 
 app.listen(port, () => {
