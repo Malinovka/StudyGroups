@@ -31,8 +31,13 @@ app.get("/api/users", (req, res, next) => {
 });
 
 app.get("/api/groups", (req, res, next) => {
-    var sql = "SELECT * FROM STUDYGROUP"
-    var params = []
+    const { username } = req.query;
+
+    if (!username) {
+        return res.status(400).json({ "error": "Username is required" });
+    }
+    var sql = "SELECT * FROM STUDYGROUP WHERE OwnerUsername = ?"
+    var params = [username]
     db.all(sql, params, (err, rows) => {
         if (err) {
             res.status(400).json({"error":err.message});
