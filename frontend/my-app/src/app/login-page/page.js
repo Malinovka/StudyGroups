@@ -4,6 +4,7 @@ import { useState } from "react";
 import React from "react";
 import '../styles.css';
 import { useRouter } from "next/navigation";
+import { useAuth } from "../provider/authProvider";
 
 function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState(null);
+  const { login } = useAuth(); // Use login function
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,29 +20,54 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset error before new request
+    setError(""); 
     setSuccess(false);
-
+  
     try {
-      const response = await axios.post("http://localhost:8000/login", formData,);
-      console.log("success");
+      const response = await axios.post("http://localhost:8000/login", formData);
+  
+      if (response.data.token) {
+        login(response.data.token); // ✅ Set token using `login()`
+        console.log("Login successful!", response.data.token);
 
-      setSuccess(true);
+        // ✅ Store token
+        localStorage.setItem("token", response.data.token);
+        // ✅ Verify storage immediately
+        console.log("📦 Token stored:", localStorage.getItem("token"));
 
-      localStorage.setItem("username", formData.username);
-      await router.push("/dashboard");
-
-
+        setSuccess(true);
+        await router.push("/dashboard");
+      }
     } catch (error) {
       setError(error.response?.data?.error || "Login failed");
     }
-
-    // try {
-    //
-    // } catch (error){
-    //   setError(error.response?.data?.error);
-    // }
   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError(""); 
+//     setSuccess(false);
+  
+//     try {
+//       const response = await axios.post("http://localhost:8000/login", formData);
+  
+//       if (response.data.token) {
+//         console.log("Login successful!", response.data.token);
+        
+//         // ✅ Save the token in state and localStorage
+//         setToken(response.data.token);
+//         localStorage.setItem("token", response.data.token);
+//         localStorage.setItem("username", formData.username);
+  
+//         setSuccess(true);
+        
+//         // ✅ Redirect to dashboard
+//         await router.push("/dashboard");
+//       }
+//     } catch (error) {
+//       setError(error.response?.data?.error || "Login failed");
+//     }
+//   };
 
   return (
     <div className="login-wrapper">
