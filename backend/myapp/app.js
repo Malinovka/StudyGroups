@@ -365,6 +365,28 @@ function verifyToken(req, res, next) {
 }
 module.exports = verifyToken;
 
+app.post("/groups/:name/users", (req, res) => {
+    const {name}=req.params;
+    const {username}=req.body;
+    if (!username){
+        return res.status(400).json({error: "Username is missing"});
+    }
+    db.get("SELECT * FROM UserGroups WHERE Username =? AND Name=?", [username, name], (err, row) => {
+        if (err){
+            return res.status(500).json({error:"Database error"});
+        }
+        if (row){
+            return res.status(200).json({message:"User is already in the group"});
+        }
+        db.run("INSERT INTO UserGroups (Username, Name) VALUES (?,?)", [username, name],(err) =>{
+            if (err){
+                return res.status(500).json({error:" Error when adding user to group"});
+            }
+            res.status(201).json({message:"User added to group successfully"});
+        });
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
