@@ -3,8 +3,10 @@ import axios from "axios";
 import { useState } from "react";
 import React from "react";
 import '../styles.css';
+import { useRouter } from "next/navigation";
 
 function LoginPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -22,11 +24,22 @@ function LoginPage() {
     try {
       const response = await axios.post("http://localhost:8000/login", formData,);
       console.log("success");
+
       setSuccess(true);
+
+      localStorage.setItem("username", formData.username);
+      await router.push("/dashboard");
+
 
     } catch (error) {
       setError(error.response?.data?.error || "Login failed");
     }
+
+    // try {
+    //
+    // } catch (error){
+    //   setError(error.response?.data?.error);
+    // }
   };
 
   return (
