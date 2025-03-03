@@ -7,6 +7,7 @@ import '../styles.css';
 function LoginPage() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const [token, setToken] = useState(null);
 
   const handleChange = (e) => {
@@ -16,10 +17,12 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(""); // Reset error before new request
+    setSuccess(false);
 
     try {
       const response = await axios.post("http://localhost:8000/login", formData,);
       console.log("success");
+      setSuccess(true);
 
     } catch (error) {
       setError(error.response?.data?.error || "Login failed");
@@ -30,6 +33,7 @@ function LoginPage() {
     <div className="login-wrapper">
       <h1>Please Log In:</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>Login successful!</p>}
       <form onSubmit={handleSubmit}>
         <fieldset>
           <label>
