@@ -285,9 +285,11 @@ const SECRET_KEY = "mysecretkey";
 
 // Login Endpoint (POST /login)
 app.post("/login", (req, res) => {
+    console.log("🟢 Incoming Login Request:", req.body);
     const { username, password } = req.body;
 
     if (!username || !password) {
+        console.error("❌ Missing username or password");
         return res.status(400).json({ error: "Username and password are required" });
     }
 
@@ -307,9 +309,11 @@ app.post("/login", (req, res) => {
         // Compare hashed password with entered password
         bcrypt.compare(password, user.Password, (err, isMatch) => {
             if (err) {
+                console.error("❌ Error verifying password:", err);
                 return res.status(500).json({ error: "Error verifying password" });
             }
             if (!isMatch) {
+                console.error("❌ Password does not match");
                 return res.status(401).json({ error: "Invalid username or password" });
             }
 
@@ -318,7 +322,8 @@ app.post("/login", (req, res) => {
                 if (err) {
                     return res.status(500).json({ error: "Failed to generate token" });
                 }
-                res.json({ token });
+                console.log("✅ Login Successful. Returning:", { token, username: user.Username });
+                res.json({ token, username: user.Username });
             });
         });
     });
@@ -369,20 +374,28 @@ module.exports = verifyToken;
 app.post("/groups/:name/users", (req, res) => {
     const {name}=req.params;
     const {username}=req.body;
+    console.log("🟢 Received request for group:", name);
+    console.log("📦 Received username:", username);
+
     if (!username){
+        console.error("❌ Error: Username is missing");
         return res.status(400).json({error: "Username is missing"});
     }
     db.get("SELECT * FROM UserGroups WHERE Username =? AND Name=?", [username, name], (err, row) => {
         if (err){
+            console.error("❌ Database error (SELECT):", err.message);
             return res.status(500).json({error:"Database error"});
         }
         if (row){
+            console.log("✅ User already in the group");
             return res.status(200).json({message:"User is already in the group"});
         }
         db.run("INSERT INTO UserGroups (Username, Name) VALUES (?,?)", [username, name],(err) =>{
             if (err){
+                console.error("❌ Database error (INSERT):", err.message);
                 return res.status(500).json({error:" Error when adding user to group"});
             }
+            console.log("✅ User added successfully to group:", name);
             res.status(201).json({message:"User added to group successfully"});
         });
     });

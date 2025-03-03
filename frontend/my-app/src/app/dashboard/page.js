@@ -6,6 +6,7 @@ import '../styles.css';
 import axios from 'axios';
 import { useRouter } from "next/navigation";
 import LogOutButton from '../LogOutButton';
+import JoinGroupButton from '../JoinGroupButton';
 const Dashboard = () => {
     const router = useRouter();
     const [messages, setMessages] = useState([]);
@@ -132,6 +133,8 @@ const Dashboard = () => {
                     />
                     <button type="submit">Create Group</button>
                 </form>
+                <h3>Join a Group</h3>
+                <JoinGroupButton></JoinGroupButton>
                 <h3>Log Out</h3>
                 <LogOutButton></LogOutButton>
             </div>

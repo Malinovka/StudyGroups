@@ -6,32 +6,53 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const [username, setUsername] = useState(null);
 
   // Load token from localStorage when component mounts (Client-Side Only)
   useEffect(() => {
+    
     const savedToken = localStorage.getItem("token");
+    const savedUsername = localStorage.getItem("username");
+
+    console.log("📦 Loading from localStorage:", { savedToken, savedUsername });
+
     if (savedToken) {
       setToken(savedToken);
       axios.defaults.headers.common["Authorization"] = "Bearer " + savedToken;
     }
+
+    if (savedUsername) {
+      setUsername(savedUsername);
+    } else {
+      console.warn("⚠️ Username is missing from localStorage");
+    }
   }, []);
 
   // Function to log in (set token)
-  const login = (newToken) => {
+  const login = (newToken, newUsername) => {
+    console.log("🔐 Logging in:", { newToken, newUsername }); // Debug log
+    if (!newUsername) {
+      console.error("❌ Username is undefined during login!");
+      return;
+    }  
     setToken(newToken);
+    setUsername(newUsername);
     localStorage.setItem("token", newToken);
+    localStorage.setItem("username", newUsername);
     axios.defaults.headers.common["Authorization"] = "Bearer " + newToken;
   };
 
   // Function to log out (remove token)
   const logout = () => {
     setToken(null);
+    setUsername(null);
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
     delete axios.defaults.headers.common["Authorization"];
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, username, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
