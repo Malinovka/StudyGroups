@@ -365,6 +365,7 @@ function verifyToken(req, res, next) {
 }
 module.exports = verifyToken;
 
+// Add User to Group
 app.post("/groups/:name/users", (req, res) => {
     const {name}=req.params;
     const {username}=req.body;
