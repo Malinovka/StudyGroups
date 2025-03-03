@@ -18,7 +18,7 @@ const App = () => {
                 </button>
 
                 <button
-                    onClick={() => router.push('/login')}
+                    onClick={() => router.push('/login-page')}
                     style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
                 >
                     Login
