@@ -3,12 +3,15 @@ const app = express()
 const bodyParser = require('body-parser'); // Needed for parsing JSON body
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const sqlite3=require('sqlite3').verbose();
+const dbFile = "./myapp/database.db";
 
 var db = require("./database.js")
 const port = 8000
 const cors = require('cors');
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
