@@ -22,12 +22,16 @@ function LoginPage() {
     e.preventDefault();
     setError(""); 
     setSuccess(false);
+
+    console.log("🟢 Sending login request with:", formData);
   
     try {
       const response = await axios.post("http://localhost:8000/login", formData);
+
+      console.log("🟢 Server Response:", response.data);
   
-      if (response.data.token) {
-        login(response.data.token); // ✅ Set token using `login()`
+      if (response.data.token && response.data.username) {
+        login(response.data.token, response.data.username); // ✅ Set token using `login()`
         console.log("Login successful!", response.data.token);
 
         // ✅ Store token
@@ -39,6 +43,7 @@ function LoginPage() {
         await router.push("/dashboard");
       }
     } catch (error) {
+      console.error("❌ Error response:", error.response?.data || error.message);
       setError(error.response?.data?.error || "Login failed");
     }
   };

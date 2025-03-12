@@ -115,7 +115,7 @@ app.post("/api/register", async (req, res) => {
 
     try {
         // Check if username already exists
-        db.get("SELECT * FROM USERS WHERE Username = ?", [username], async (err, row) => {
+        db.get("SELECT * FROM USERS WHERE Username = ?", [username], (err, row) => { // can't use async in callback function
             if (err) {
                 return res.status(500).json({ error: "Database error" });
             }
@@ -138,6 +138,7 @@ app.post("/api/register", async (req, res) => {
 
                 db.run(sql, params, function (err) {
                     if (err) {
+                        console.error("❌ Error inserting into database:", err.message);
                         return res.status(500).json({ error: err.message });
                     }
                     res.status(201).json({
@@ -153,6 +154,7 @@ app.post("/api/register", async (req, res) => {
             });
         });
     } catch (error) {
+        console.error("❌ Internal Server Error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
