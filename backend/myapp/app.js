@@ -374,34 +374,52 @@ module.exports = verifyToken;
 
 // Add User to Group
 app.post("/groups/:name/users", (req, res) => {
-    const {name}=req.params;
-    const {username}=req.body;
+    const { name } = req.params;
+    const { username } = req.body;
+
     console.log("🟢 Received request for group:", name);
     console.log("📦 Received username:", username);
 
-    if (!username){
+    if (!username) {
         console.error("❌ Error: Username is missing");
-        return res.status(400).json({error: "Username is missing"});
+        return res.status(400).json({ error: "Username is missing" });
     }
-    db.get("SELECT * FROM UserGroups WHERE Username =? AND Name=?", [username, name], (err, row) => {
-        if (err){
-            console.error("❌ Database error (SELECT):", err.message);
-            return res.status(500).json({error:"Database error"});
+
+    // ✅ Step 1: Check if the group exists in the StudyGroup table
+    db.get("SELECT * FROM StudyGroup WHERE Name = ?", [name], (err, groupRow) => {
+        if (err) {
+            console.error("❌ Database error (CHECK GROUP EXISTS):", err.message);
+            return res.status(500).json({ error: "Database error" });
         }
-        if (row){
-            console.log("✅ User already in the group");
-            return res.status(200).json({message:"User is already in the group"});
+        if (!groupRow) {
+            console.error("❌ Error: Group does not exist");
+            return res.status(404).json({ error: "Group does not exist" });
         }
-        db.run("INSERT INTO UserGroups (Username, Name) VALUES (?,?)", [username, name],(err) =>{
-            if (err){
-                console.error("❌ Database error (INSERT):", err.message);
-                return res.status(500).json({error:" Error when adding user to group"});
+
+        // ✅ Step 2: Check if the user is already in the group
+        db.get("SELECT * FROM UserGroups WHERE Username = ? AND Name = ?", [username, name], (err, row) => {
+            if (err) {
+                console.error("❌ Database error (CHECK USER EXISTS):", err.message);
+                return res.status(500).json({ error: "Database error" });
             }
-            console.log("✅ User added successfully to group:", name);
-            res.status(201).json({message:"User added to group successfully"});
+            if (row) {
+                console.log("✅ User already in the group");
+                return res.status(200).json({ message: "User is already in the group" });
+            }
+
+            // ✅ Step 3: Add the user to the group
+            db.run("INSERT INTO UserGroups (Username, Name) VALUES (?, ?)", [username, name], (err) => {
+                if (err) {
+                    console.error("❌ Database error (INSERT USER):", err.message);
+                    return res.status(500).json({ error: "Error when adding user to group" });
+                }
+                console.log("✅ User added successfully to group:", name);
+                res.status(201).json({ message: "User added to group successfully" });
+            });
         });
     });
 });
+
 
 
 app.listen(port, () => {

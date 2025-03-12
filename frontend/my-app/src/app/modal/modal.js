@@ -1,15 +1,27 @@
 "use client";
-import { useState } from "react";
 import axios from "axios";
-import { useAuth } from "./provider/authProvider"; // Import AuthContext
+import { useAuth } from "../provider/authProvider";
+import React from "react";
+import { useState, useEffect } from "react";
+import "./modal.css" ;
 
-const JoinGroupModal = ({ isOpen, onClose }) => {
+const Modal = ({ show, onClose }) => {
   const { token, username } = useAuth(); // Retrieve username from context
   const [groupName, setGroupName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  if (!isOpen) return null; // Don't render if modal is closed
+  useEffect(() => {
+    if (show) {
+      setGroupName(""); // Reset input field
+      setError(""); // Clear error messages
+      setSuccess(false); // Clear success message
+    }
+  }, [show]); // Runs whenever `show` changes
+
+  if (!show) {
+    return null; // Don't render if show is false
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +31,7 @@ const JoinGroupModal = ({ isOpen, onClose }) => {
     console.log("🔍 Username in AuthContext:", username);
 
     if (!groupName.trim()) {
-      setError("Group name is required");
+      setError("❌ Group name is required");
       return;
     }
 
@@ -40,22 +52,32 @@ const JoinGroupModal = ({ isOpen, onClose }) => {
         }
       );
 
-      console.log("✅ Successfully joined group:", response.data);
-      setSuccess(true);
-      setGroupName("");
+      console.log("✅ Received response from backend:", response.data);
+
+      if (response.data.message === "User is already in the group") {
+        setSuccess(false);
+        setError("⚠️ You are already in this group");
+      } else if (response.data.message === "Group does not exist"){
+        setSuccess(false);
+        setError("⚠️ Group does not exist"); // Clear any previous errors
+      } else {
+        setSuccess(true);
+        setError(""); // Clear any previous errors
+      }
 
       setTimeout(() => {
+        console.log("🚀 Closing modal now...");
         onClose(); // Close the modal after 1 second
-      }, 1000);
+      }, 2000);
     } catch (error) {
       setError(error.response?.data?.error || "Failed to join group");
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-600 text-lg font-bold">
+    <div className="modal-overlay">
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <button onClick={onClose} className="absolute top-2 left-2 text-gray-600 text-lg font-bold">
           ✖
         </button>
         <h2 className="text-xl font-bold mb-4">Join a Group</h2>
@@ -82,5 +104,4 @@ const JoinGroupModal = ({ isOpen, onClose }) => {
   );
 };
 
-export default JoinGroupModal;
-
+export default Modal;

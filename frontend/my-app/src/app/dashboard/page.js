@@ -133,9 +133,9 @@ const Dashboard = () => {
                     />
                     <button type="submit">Create Group</button>
                 </form>
-                <h3>Join a Group</h3>
+                <h2>Join a Group</h2>
                 <JoinGroupButton></JoinGroupButton>
-                <h3>Log Out</h3>
+                <h2>Log Out</h2>
                 <LogOutButton></LogOutButton>
             </div>
         </div>
