@@ -6,13 +6,20 @@ const jwt = require("jsonwebtoken");
 
 var db = require("./database.js")
 const port = 8000
+const PORT=8080
 const cors = require('cors');
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
 var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+//var io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "http://localhost:3000",  // Allow frontend access
+        methods: ["GET", "POST"]
+    }
+});
 const STATIC_CHANNELS = ['global_notifications', 'global_chat'];
 
 app.get('/', (req, res) => {

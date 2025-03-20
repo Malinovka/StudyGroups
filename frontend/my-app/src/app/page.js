@@ -1,14 +1,29 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import socketClient  from "socket.io-client";
-const SERVER = "http://127.0.0.1:8000";
+const SERVER = "http://127.0.0.1:8080";
 
 const App = () => {
-    var socket = socketClient (SERVER);
-        socket.on('connection', () => {
-            console.log(`I'm connected with the back-end`);
-    });
+    useEffect(() => {
+        var socket = socketClient(SERVER, {
+            withCredentials: true,  // Ensures CORS works correctly
+            transports: ['websocket', 'polling']
+        });
+
+        socket.on('connect', () => {
+            console.log("I'm connected with the back-end");
+        });
+
+        socket.on('disconnect', () => {
+            console.log("Disconnected from server");
+        });
+
+        return () => {
+            socket.disconnect();  // Cleanup when component unmounts
+        };
+    }, []);
     const router = useRouter();
 
     return (
