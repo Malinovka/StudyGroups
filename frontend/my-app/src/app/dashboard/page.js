@@ -13,11 +13,13 @@ const Dashboard = () => {
     const [groups, setGroups] = useState([]);
     const [newGroup, setNewGroup] = useState({ name: '', owner: '', memberLimit: '' });
     const [username, setUsername] = useState("");
-
+    const handleAddGroup = (group) => {
+        setGroups((prev) => [...prev, group]);
+    };
     useEffect(() => {
         const storedUsername = localStorage.getItem("username");
         if (!storedUsername) {
-            router.push("/login"); // Redirect to login if no user found
+            router.push("/login-page"); // Redirect to login if no user found
         } else {
             setUsername(storedUsername);
         }
@@ -134,7 +136,7 @@ const Dashboard = () => {
                     <button type="submit">Create Group</button>
                 </form>
                 <h2>Join a Group</h2>
-                <JoinGroupButton></JoinGroupButton>
+                <JoinGroupButton onGroupJoined={handleAddGroup} />
                 <h2>Log Out</h2>
                 <LogOutButton></LogOutButton>
             </div>
