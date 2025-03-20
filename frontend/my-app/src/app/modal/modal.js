@@ -5,7 +5,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import "./modal.css" ;
 
-const Modal = ({ show, onClose }) => {
+const Modal = ({ show, onClose, onGroupJoined }) => {
   const { token, username } = useAuth(); // Retrieve username from context
   const [groupName, setGroupName] = useState("");
   const [error, setError] = useState("");
@@ -31,19 +31,19 @@ const Modal = ({ show, onClose }) => {
     console.log("🔍 Username in AuthContext:", username);
 
     if (!groupName.trim()) {
-      setError("❌ Group name is required");
+      setError("Group name is required");
       return;
     }
 
     if (!username) {
-      setError("❌ Error: Username is missing from AuthContext");
-      console.error("❌ Username is missing in AuthContext");
+      setError("Error: Username is missing from AuthContext");
+      console.error("Username is missing in AuthContext");
       return;
     }
 
     try {
-      console.log("🟢 Sending Request to:", `http://localhost:8000/groups/${encodeURIComponent(groupName)}/users`);
-      console.log("📦 Request Body:", { username });
+      console.log("Sending Request to:", `http://localhost:8000/groups/${encodeURIComponent(groupName)}/users`);
+      console.log("Request Body:", { username });
       const response = await axios.post(
         `http://localhost:8000/groups/${encodeURIComponent(groupName)}/users`,
         { username }, // Send username from AuthContext
@@ -52,17 +52,28 @@ const Modal = ({ show, onClose }) => {
         }
       );
 
-      console.log("✅ Received response from backend:", response.data);
+
+
+      console.log(" Received response from backend:", response.data);
 
       if (response.data.message === "User is already in the group") {
         setSuccess(false);
-        setError("⚠️ You are already in this group");
+        setError(" You are already in this group");
       } else if (response.data.message === "Group does not exist"){
         setSuccess(false);
-        setError("⚠️ Group does not exist"); // Clear any previous errors
+        setError(" Group does not exist"); // Clear any previous errors
       } else {
         setSuccess(true);
+
         setError(""); // Clear any previous errors
+        //const groupDetails = await axios.get(`http://localhost:8000/api/groups/${encodeURIComponent(groupName)}`);
+        // onGroupJoined({
+        //   name: groupDetails.data.name,
+        //   owner: groupDetails.data.owner,
+        //   memberLimit: groupDetails.data.memberLimit,
+        // });
+        onGroupJoined({ name: groupName, owner: "Unknown", memberLimit: "?" });
+
       }
 
       setTimeout(() => {

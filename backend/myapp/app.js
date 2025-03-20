@@ -36,7 +36,7 @@ app.get("/api/groups", (req, res, next) => {
     if (!username) {
         return res.status(400).json({ "error": "Username is required" });
     }
-    var sql = "SELECT * FROM STUDYGROUP WHERE OwnerUsername = ?"
+    var sql = "SELECT * FROM UserGroups WHERE Username = ?"
     var params = [username]
     db.all(sql, params, (err, rows) => {
         if (err) {
@@ -96,6 +96,22 @@ app.post("/api/groups", (req, res) => {
         }
         res.status(201).json({
             message: "Group created successfully",
+            group: {
+                id: this.lastID,  // Return newly created ID
+                name,
+                owner,
+                memberLimit
+            }
+        });
+    });
+    var sql2 = 'INSERT INTO UserGroups (Username, Name) VALUES (?,?)';
+    var params2 = [owner,name]
+    db.run(sql2, params2, function (err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.status(201).json({
+            message: "Owner Added to the group",
             group: {
                 id: this.lastID,  // Return newly created ID
                 name,
