@@ -6,6 +6,9 @@ const SERVER = "http://127.0.0.1:8000";
 
 const App = () => {
     var socket = socketClient (SERVER);
+        socket.on('connection', () => {
+            console.log(`I'm connected with the back-end`);
+    });
     const router = useRouter();
 
     return (
