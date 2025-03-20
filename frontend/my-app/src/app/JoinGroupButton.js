@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import Modal from "./modal/modal";
 
-const JoinGroupButton = () => {
+const JoinGroupButton = ({ onGroupJoined}) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
     <div>
       <button onClick={() => setShowModal(true)}>Show Modal</button>
-      <Modal show={showModal} onClose={() => setShowModal(false)} />
+      <Modal show={showModal} onClose={() => setShowModal(false)} onGroupJoined = {onGroupJoined} />
     </div>
   );
 };

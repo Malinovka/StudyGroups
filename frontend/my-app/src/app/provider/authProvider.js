@@ -24,15 +24,15 @@ export const AuthProvider = ({ children }) => {
     if (savedUsername) {
       setUsername(savedUsername);
     } else {
-      console.warn("⚠️ Username is missing from localStorage");
+      console.warn("Username is missing from localStorage");
     }
   }, []);
 
   // Function to log in (set token)
   const login = (newToken, newUsername) => {
-    console.log("🔐 Logging in:", { newToken, newUsername }); // Debug log
+    console.log("Logging in:", { newToken, newUsername }); // Debug log
     if (!newUsername) {
-      console.error("❌ Username is undefined during login!");
+      console.error("Username is undefined during login!");
       return;
     }  
     setToken(newToken);
