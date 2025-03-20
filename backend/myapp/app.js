@@ -115,7 +115,7 @@ app.post("/api/register", async (req, res) => {
 
     try {
         // Check if username already exists
-        db.get("SELECT * FROM USERS WHERE Username = ?", [username], async (err, row) => {
+        db.get("SELECT * FROM USERS WHERE Username = ?", [username], (err, row) => { // can't use async in callback function
             if (err) {
                 return res.status(500).json({ error: "Database error" });
             }
@@ -138,6 +138,7 @@ app.post("/api/register", async (req, res) => {
 
                 db.run(sql, params, function (err) {
                     if (err) {
+                        console.error("❌ Error inserting into database:", err.message);
                         return res.status(500).json({ error: err.message });
                     }
                     res.status(201).json({
@@ -153,6 +154,7 @@ app.post("/api/register", async (req, res) => {
             });
         });
     } catch (error) {
+        console.error("❌ Internal Server Error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -285,9 +287,11 @@ const SECRET_KEY = "mysecretkey";
 
 // Login Endpoint (POST /login)
 app.post("/login", (req, res) => {
+    console.log("🟢 Incoming Login Request:", req.body);
     const { username, password } = req.body;
 
     if (!username || !password) {
+        console.error("❌ Missing username or password");
         return res.status(400).json({ error: "Username and password are required" });
     }
 
@@ -307,9 +311,11 @@ app.post("/login", (req, res) => {
         // Compare hashed password with entered password
         bcrypt.compare(password, user.Password, (err, isMatch) => {
             if (err) {
+                console.error("❌ Error verifying password:", err);
                 return res.status(500).json({ error: "Error verifying password" });
             }
             if (!isMatch) {
+                console.error("❌ Password does not match");
                 return res.status(401).json({ error: "Invalid username or password" });
             }
 
@@ -318,7 +324,8 @@ app.post("/login", (req, res) => {
                 if (err) {
                     return res.status(500).json({ error: "Failed to generate token" });
                 }
-                res.json({ token });
+                console.log("✅ Login Successful. Returning:", { token, username: user.Username });
+                res.json({ token, username: user.Username });
             });
         });
     });
@@ -367,26 +374,52 @@ module.exports = verifyToken;
 
 // Add User to Group
 app.post("/groups/:name/users", (req, res) => {
-    const {name}=req.params;
-    const {username}=req.body;
-    if (!username){
-        return res.status(400).json({error: "Username is missing"});
+    const { name } = req.params;
+    const { username } = req.body;
+
+    console.log("🟢 Received request for group:", name);
+    console.log("📦 Received username:", username);
+
+    if (!username) {
+        console.error("❌ Error: Username is missing");
+        return res.status(400).json({ error: "Username is missing" });
     }
-    db.get("SELECT * FROM UserGroups WHERE Username =? AND Name=?", [username, name], (err, row) => {
-        if (err){
-            return res.status(500).json({error:"Database error"});
+
+    // ✅ Step 1: Check if the group exists in the StudyGroup table
+    db.get("SELECT * FROM StudyGroup WHERE Name = ?", [name], (err, groupRow) => {
+        if (err) {
+            console.error("❌ Database error (CHECK GROUP EXISTS):", err.message);
+            return res.status(500).json({ error: "Database error" });
         }
-        if (row){
-            return res.status(200).json({message:"User is already in the group"});
+        if (!groupRow) {
+            console.error("❌ Error: Group does not exist");
+            return res.status(404).json({ error: "Group does not exist" });
         }
-        db.run("INSERT INTO UserGroups (Username, Name) VALUES (?,?)", [username, name],(err) =>{
-            if (err){
-                return res.status(500).json({error:" Error when adding user to group"});
+
+        // ✅ Step 2: Check if the user is already in the group
+        db.get("SELECT * FROM UserGroups WHERE Username = ? AND Name = ?", [username, name], (err, row) => {
+            if (err) {
+                console.error("❌ Database error (CHECK USER EXISTS):", err.message);
+                return res.status(500).json({ error: "Database error" });
             }
-            res.status(201).json({message:"User added to group successfully"});
+            if (row) {
+                console.log("✅ User already in the group");
+                return res.status(200).json({ message: "User is already in the group" });
+            }
+
+            // ✅ Step 3: Add the user to the group
+            db.run("INSERT INTO UserGroups (Username, Name) VALUES (?, ?)", [username, name], (err) => {
+                if (err) {
+                    console.error("❌ Database error (INSERT USER):", err.message);
+                    return res.status(500).json({ error: "Error when adding user to group" });
+                }
+                console.log("✅ User added successfully to group:", name);
+                res.status(201).json({ message: "User added to group successfully" });
+            });
         });
     });
 });
+
 
 
 app.listen(port, () => {
