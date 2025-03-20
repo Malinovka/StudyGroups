@@ -43,7 +43,7 @@ function LoginPage() {
         await router.push("/dashboard");
       }
     } catch (error) {
-      console.error("❌ Error response:", error.response?.data || error.message);
+      //console.error("Error response:", error.response?.data || error.message);
       setError(error.response?.data?.error || "Login failed");
     }
   };

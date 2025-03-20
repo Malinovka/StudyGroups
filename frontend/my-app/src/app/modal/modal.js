@@ -91,10 +91,10 @@ const Modal = ({ show, onClose, onGroupJoined }) => {
       <button onClick={onClose} className="absolute top-2 left-2 text-gray-600 text-lg font-bold">
           ✖
         </button>
-        <h2 className="text-xl font-bold mb-4">Join a Group</h2>
+        <h2 style={{ color:'purple'}} className="text-xl font-bold mb-4">Join a Group</h2>
 
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">Successfully joined!</p>}
+        {error && <p style={{ color:'red'}}>{error}</p>}
+        {success && <p style={{ color:'green'}}>Successfully joined!</p>}
 
         <form onSubmit={handleSubmit}>
           <input
