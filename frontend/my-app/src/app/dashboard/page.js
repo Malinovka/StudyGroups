@@ -17,7 +17,7 @@ const Dashboard = () => {
     useEffect(() => {
         const storedUsername = localStorage.getItem("username");
         if (!storedUsername) {
-            router.push("/login"); // Redirect to login if no user found
+            router.push("/login-page"); // Redirect to login if no user found
         } else {
             setUsername(storedUsername);
         }

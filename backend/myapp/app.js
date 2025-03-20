@@ -287,11 +287,11 @@ const SECRET_KEY = "mysecretkey";
 
 // Login Endpoint (POST /login)
 app.post("/login", (req, res) => {
-    console.log("🟢 Incoming Login Request:", req.body);
+    console.log("Incoming Login Request:", req.body);
     const { username, password } = req.body;
 
     if (!username || !password) {
-        console.error("❌ Missing username or password");
+        console.error("Missing username or password");
         return res.status(400).json({ error: "Username and password are required" });
     }
 
@@ -324,7 +324,7 @@ app.post("/login", (req, res) => {
                 if (err) {
                     return res.status(500).json({ error: "Failed to generate token" });
                 }
-                console.log("✅ Login Successful. Returning:", { token, username: user.Username });
+                console.log("Login Successful. Returning:", { token, username: user.Username });
                 res.json({ token, username: user.Username });
             });
         });
