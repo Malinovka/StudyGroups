@@ -1,8 +1,11 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import socketClient  from "socket.io-client";
+const SERVER = "http://127.0.0.1:8000";
 
 const App = () => {
+    var socket = socketClient (SERVER);
     const router = useRouter();
 
     return (

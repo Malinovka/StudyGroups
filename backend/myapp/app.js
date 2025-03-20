@@ -11,6 +11,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
+var io = require('socket.io')(http);
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
@@ -436,8 +438,12 @@ app.post("/groups/:name/users", (req, res) => {
     });
 });
 
-
-
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
+});
+
+io.on('connection', (socket) => { /* socket object may be used to send specific messages to the new connected client */
+
+    console.log('new client connected');
+
 });
