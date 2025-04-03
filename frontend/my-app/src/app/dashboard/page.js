@@ -1,5 +1,5 @@
 'use client';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import ChatBox from '../chatbox';
 import GroupList from '../GroupSelector';
 import '../styles.css';
@@ -7,15 +7,29 @@ import axios from 'axios';
 import { useRouter } from "next/navigation";
 import LogOutButton from '../LogOutButton';
 import JoinGroupButton from '../JoinGroupButton';
+import { io } from 'socket.io-client';
+
+const SERVER = "http://localhost:8000";
+
+
 const Dashboard = () => {
     const router = useRouter();
+    const [socket, setSocket] = useState(null);
     const [messages, setMessages] = useState([]);
     const [groups, setGroups] = useState([]);
+    const [currentGroup, setCurrentGroup] = useState(null);
+
     const [newGroup, setNewGroup] = useState({ name: '', owner: '', memberLimit: '' });
     const [username, setUsername] = useState("");
+
+    const messagesEndRef = useRef(null);
+
     const handleAddGroup = (group) => {
         setGroups((prev) => [...prev, group]);
     };
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
     useEffect(() => {
         const storedUsername = localStorage.getItem("username");
         if (!storedUsername) {
@@ -24,6 +38,21 @@ const Dashboard = () => {
             setUsername(storedUsername);
         }
     }, [router]);
+
+    useEffect(() => {
+        const newSocket = io(SERVER);
+        setSocket(newSocket);
+
+        newSocket.on("connect", () => {
+            console.log("Connected to Socket.IO server");
+        });
+
+        newSocket.on("groupMessage", ({ sender, message, html }) => {
+            setMessages((prev) => [...prev, { sender, plainText: message, html }]);
+        });
+
+        return () => newSocket.disconnect();
+    }, []);
 
     const handleInputChange = (e) => {
         setNewGroup({ ...newGroup, [e.target.name]: e.target.value });
@@ -81,10 +110,17 @@ const Dashboard = () => {
 
 
     const handleSendMessage = ({ html, plainText }) => {
-        setMessages((prevMessages) => [
-            ...prevMessages,
-            { sender: 'You', html: html, plainText: plainText },
-        ]);
+        if (!currentGroup || !socket) return;
+
+        const payload = {
+            groupName: currentGroup.name,
+            sender: username,
+            message: plainText,
+            html
+        };
+
+        setMessages((prev) => [...prev, { sender: 'You', plainText, html }]);
+        socket.emit('groupMessage', payload);
     };
 
     // const groups = [
@@ -100,9 +136,26 @@ const Dashboard = () => {
     //     { name: 'Group 10' }
     //   ];
 
-      const handleGroupSelect = (group) => {
-        console.log('Selected Group:', group);
-      };
+    const handleGroupSelect = async (group) => {
+        setCurrentGroup(group);
+        setMessages([]);
+
+        if (socket) {
+            socket.emit("joinGroup", group.name);
+        }
+
+        try {
+            const response = await axios.get(`http://localhost:8000/api/messages?group=${group.name}`);
+            setMessages(response.data.messages.map(msg => ({
+                sender: msg.Sender,
+                plainText: msg.Message,
+                html: msg.Html
+            })));
+        } catch (error) {
+            console.error("Error loading messages:", error);
+        }
+    };
+
 
     return (
         <div className="page-container">
