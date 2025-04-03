@@ -3,7 +3,7 @@ const app = express()
 const bodyParser = require('body-parser'); // Needed for parsing JSON body
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-
+const server = require('http').createServer(app); // Required for socket.io
 var db = require("./database.js")
 const port = 8000
 const cors = require('cors');
@@ -11,10 +11,61 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+
+    socket.on('joinGroup', (groupName) => {
+        socket.join(groupName);
+        console.log(`Socket ${socket.id} joined room ${groupName}`);
+    });
+
+
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+    socket.on('groupMessage', ({ groupName, sender, message, html }) => {
+        const sql = `INSERT INTO Messages (GroupName, Sender, Message, Html) VALUES (?, ?, ?, ?)`;
+        db.run(sql, [groupName, sender, message, html], (err) => {
+            if (err) {
+                console.error("Failed to save message:", err.message);
+            } else {
+                console.log(`💬 Message from ${sender} saved in ${groupName}`);
+            }
+        });
+
+        socket.to(groupName).emit('groupMessage', { sender, message, html });
+    });
+
+});
+
+
+
+app.get('/api/messages', (req, res) => {
+    const groupName = req.query.group;
+    if (!groupName) return res.status(400).json({ error: "Group name is required" });
+
+    const sql = `SELECT Sender, Message, Html, Timestamp FROM Messages WHERE GroupName = ? ORDER BY Timestamp ASC`;
+    db.all(sql, [groupName], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ messages: rows });
+    });
+});
+
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+    res.send('Hello from Express and Socket.IO server');
+});
+
+// app.get('/', (req, res) => {
+//     res.send('Hello World!')
+// })
 
 app.get("/api/users", (req, res, next) => {
     var sql = "SELECT * FROM USERS"
@@ -88,40 +139,36 @@ app.post("/api/groups", (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    var sql = `INSERT INTO STUDYGROUP (Name, OwnerUsername, MemberLimit) VALUES (?, ?, ?)`;
-    var params = [name, owner, memberLimit];
+    const sql = `INSERT INTO STUDYGROUP (Name, OwnerUsername, MemberLimit) VALUES (?, ?, ?)`;
+    const params = [name, owner, memberLimit];
 
     db.run(sql, params, function (err) {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        res.status(201).json({
-            message: "Group created successfully",
-            group: {
-                id: this.lastID,  // Return newly created ID
-                name,
-                owner,
-                memberLimit
+
+        const sql2 = `INSERT INTO UserGroups (Username, Name) VALUES (?, ?)`;
+        const params2 = [owner, name];
+
+        db.run(sql2, params2, function (err2) {
+            if (err2) {
+                return res.status(500).json({ error: err2.message });
             }
-        });
-    });
-    var sql2 = 'INSERT INTO UserGroups (Username, Name) VALUES (?,?)';
-    var params2 = [owner,name]
-    db.run(sql2, params2, function (err) {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json({
-            message: "Owner Added to the group",
-            group: {
-                id: this.lastID,  // Return newly created ID
-                name,
-                owner,
-                memberLimit
-            }
+
+            // Only send the response once, when all DB inserts succeed
+            res.status(201).json({
+                message: "Group created successfully and owner added to group",
+                group: {
+                    id: this.lastID,
+                    name,
+                    owner,
+                    memberLimit
+                }
+            });
         });
     });
 });
+
 
 app.post("/api/register", async (req, res) => {
     const { firstname, lastname, username, password, email } = req.body;
@@ -155,7 +202,7 @@ app.post("/api/register", async (req, res) => {
 
                 db.run(sql, params, function (err) {
                     if (err) {
-                        console.error("❌ Error inserting into database:", err.message);
+                        console.error(" Error inserting into database:", err.message);
                         return res.status(500).json({ error: err.message });
                     }
                     res.status(201).json({
@@ -171,7 +218,7 @@ app.post("/api/register", async (req, res) => {
             });
         });
     } catch (error) {
-        console.error("❌ Internal Server Error:", error);
+        console.error(" Internal Server Error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -328,11 +375,11 @@ app.post("/login", (req, res) => {
         // Compare hashed password with entered password
         bcrypt.compare(password, user.Password, (err, isMatch) => {
             if (err) {
-                console.error("❌ Error verifying password:", err);
+                console.error(" Error verifying password:", err);
                 return res.status(500).json({ error: "Error verifying password" });
             }
             if (!isMatch) {
-                console.error("❌ Password does not match");
+                console.error(" Password does not match");
                 return res.status(401).json({ error: "Invalid username or password" });
             }
 
@@ -398,45 +445,47 @@ app.post("/groups/:name/users", (req, res) => {
     console.log("📦 Received username:", username);
 
     if (!username) {
-        console.error("❌ Error: Username is missing");
+        console.error(" Error: Username is missing");
         return res.status(400).json({ error: "Username is missing" });
     }
 
-    // ✅ Step 1: Check if the group exists in the StudyGroup table
+    //  Step 1: Check if the group exists in the StudyGroup table
     db.get("SELECT * FROM StudyGroup WHERE Name = ?", [name], (err, groupRow) => {
         if (err) {
-            console.error("❌ Database error (CHECK GROUP EXISTS):", err.message);
+            console.error(" Database error (CHECK GROUP EXISTS):", err.message);
             return res.status(500).json({ error: "Database error" });
         }
         if (!groupRow) {
-            console.error("❌ Error: Group does not exist");
+            console.error(" Error: Group does not exist");
             return res.status(404).json({ error: "Group does not exist" });
         }
 
-        // ✅ Step 2: Check if the user is already in the group
+        //  Step 2: Check if the user is already in the group
         db.get("SELECT * FROM UserGroups WHERE Username = ? AND Name = ?", [username, name], (err, row) => {
             if (err) {
-                console.error("❌ Database error (CHECK USER EXISTS):", err.message);
+                console.error(" Database error (CHECK USER EXISTS):", err.message);
                 return res.status(500).json({ error: "Database error" });
             }
             if (row) {
-                console.log("✅ User already in the group");
+                console.log(" User already in the group");
                 return res.status(200).json({ message: "User is already in the group" });
             }
 
-            // ✅ Step 3: Add the user to the group
+
             db.run("INSERT INTO UserGroups (Username, Name) VALUES (?, ?)", [username, name], (err) => {
                 if (err) {
-                    console.error("❌ Database error (INSERT USER):", err.message);
+                    console.error(" Database error (INSERT USER):", err.message);
                     return res.status(500).json({ error: "Error when adding user to group" });
                 }
-                console.log("✅ User added successfully to group:", name);
+                console.log("User added successfully to group:", name);
                 res.status(201).json({ message: "User added to group successfully" });
             });
         });
     });
 });
 
-app.listen(port, () => {
+
+
+server.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 });
