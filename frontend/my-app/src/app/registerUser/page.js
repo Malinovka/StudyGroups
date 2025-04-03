@@ -1,6 +1,7 @@
 'use client';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
+import Button from '@mui/material/Button';
 
 const RegisterUser = () => {
     const [formData, setFormData] = useState({
@@ -81,7 +82,7 @@ const RegisterUser = () => {
         );
     };
     return (
-        <div className="form">
+        <div className="form" style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: "50px" }}>
             <div>
                 <h1>User Registration</h1>
             </div>
@@ -111,10 +112,11 @@ const RegisterUser = () => {
                 <label className="label">Email</label>
                 <input name="email" onChange={handleChange} className="input" value={formData.email} type="email"/>
 
-
-                <button onClick={handleSubmit} className="btn" type="submit">
+                <br></br>
+                <br></br>
+                <Button variant="contained" onClick={handleSubmit} className="btn" type="submit">
                     Submit
-                </button>
+                </Button>
             </form>
         </div>
     );

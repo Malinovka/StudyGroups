@@ -158,7 +158,7 @@ const Dashboard = () => {
 
 
     return (
-        <div className="page-container">
+        <div className="page-container" style={{ position: "relative", zIndex: 1, marginTop: "50px" }}>
             <div className="page">
                 <div className="main">
                     <ChatBox messages={messages} onSendMessage={handleSendMessage}/>
