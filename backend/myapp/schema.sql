@@ -6,6 +6,7 @@ DROP TABLE RequestType;
 DROP TABLE RequestStatus;
 DROP TABLE Request;
 DROP TABLE UserGroups;
+DROP TABLE Messages;
 
 CREATE TABLE USERS
 (
@@ -35,6 +36,18 @@ CREATE TABLE MAJORS
     Name VARCHAR(50) PRIMARY KEY,
     FacultyName VARCHAR(50)
 );
+
+CREATE TABLE Messages (
+                          Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                          GroupName VARCHAR(50) NOT NULL,
+                          Sender VARCHAR(50) NOT NULL,
+                          Message TEXT NOT NULL,
+                          Html TEXT,
+                          Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (GroupName) REFERENCES STUDYGROUP(Name),
+                          FOREIGN KEY (Sender) REFERENCES USERS(Username)
+);
+
 
 CREATE TABLE RequestType (
                              RequestTypeId SERIAL PRIMARY KEY,
