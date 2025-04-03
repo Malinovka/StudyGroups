@@ -5,6 +5,7 @@ import React from "react";
 import '../styles.css';
 import { useRouter } from "next/navigation";
 import { useAuth } from "../provider/authProvider";
+import Button from '@mui/material/Button';
 
 function LoginPage() {
   const router = useRouter();
@@ -75,7 +76,7 @@ function LoginPage() {
 //   };
 
   return (
-    <div className="login-wrapper">
+    <div className="login-wrapper" style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: "50px" }}>
       <h1>Please Log In:</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {success && <p style={{ color: "green" }}>Login successful!</p>}
@@ -90,7 +91,7 @@ function LoginPage() {
             <input type="password" name="password" value={formData.password} onChange={handleChange} required />
           </label>
         </fieldset>
-        <button type="submit">Submit</button>
+        <Button variant="contained" type="submit">Submit</Button>
       </form>
       {token && <p>Token: {token}</p>}
     </div>

@@ -6,21 +6,11 @@ const jwt = require("jsonwebtoken");
 
 var db = require("./database.js")
 const port = 8000
-const PORT=8080
 const cors = require('cors');
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-var http = require('http').createServer(app);
-//var io = require('socket.io')(http);
-const io = require('socket.io')(http, {
-    cors: {
-        origin: "http://localhost:3000",  // Allow frontend access
-        methods: ["GET", "POST"]
-    }
-});
-const STATIC_CHANNELS = ['global_notifications', 'global_chat'];
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -449,18 +439,4 @@ app.post("/groups/:name/users", (req, res) => {
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-});
-
-http.listen(PORT, () => {
-    console.log(`Listening on *:${PORT}`);
-});
-
-io.on('connection', (socket) => { /* socket object may be used to send specific messages to the new connected client */
-
-    console.log('new client connected');
-    socket.emit('connection', null);
-    socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
-    });
-
 });
