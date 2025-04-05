@@ -83,20 +83,34 @@ const RegisterUser = () => {
         );
     };
     return (
-        <div className="form" style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: "50px" }}>
-            <div>
-                <h1>User Registration</h1>
-            </div>
+      <div
+        className="form"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          textAlign: "center",
+          marginTop: "50px",
+        }}
+      >
+        <div>
+          <h1>User Registration</h1>
+        </div>
 
-            {/* Calling to the methods */}
-            <div className="messages">
-                {errorMessage()}
-                {successMessage()}
-            </div>
+        {/* Calling to the methods */}
+        <div className="messages">
+          {errorMessage()}
+          {successMessage()}
+        </div>
 
-            <form style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {/* Labels and inputs for form data */}
-                {/* <label className="label">First Name</label>
+        <form
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* Labels and inputs for form data */}
+          {/* <label className="label">First Name</label>
                 <input name="firstname" onChange={handleChange} className="input" value={formData.firstname}
                        type="text"/>
                 <br></br>
@@ -113,55 +127,60 @@ const RegisterUser = () => {
                 <label className="label">Email</label>
                 <input name="email" onChange={handleChange} className="input" value={formData.email} type="email"/> */}
 
-<TextField
-        required
-        label="First Name"
-        name="firstname"
-        value={formData.firstname}
-        onChange={handleChange}
-        margin="normal"
-    />
-    <TextField
-        required
-        label="Last Name"
-        name="lastname"
-        value={formData.lastname}
-        onChange={handleChange}
-        margin="normal"
-    />
-    <TextField
-        required
-        label="Username"
-        name="username"
-        value={formData.username}
-        onChange={handleChange}
-        margin="normal"
-    />
-    <TextField
-        required
-        type="password"
-        label="Password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        margin="normal"
-    />
-    <TextField
-        required
-        type="email"
-        label="Email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        margin="normal"
-    />
-                <br></br>
-                <br></br>
-                <Button variant="contained" onClick={handleSubmit} className="btn" type="submit">
-                    Submit
-                </Button>
-            </form>
-        </div>
+          <TextField
+            required
+            label="First Name"
+            name="firstname"
+            value={formData.firstname}
+            onChange={handleChange}
+            margin="normal"
+          />
+          <TextField
+            required
+            label="Last Name"
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleChange}
+            margin="normal"
+          />
+          <TextField
+            required
+            label="Username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            margin="normal"
+          />
+          <TextField
+            required
+            type="password"
+            label="Password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+          />
+          <TextField
+            required
+            type="email"
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            margin="normal"
+          />
+          <br></br>
+          <br></br>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            className="btn"
+            type="submit"
+          >
+            Submit
+          </Button>
+        </form>
+      </div>
     );
 }
 
