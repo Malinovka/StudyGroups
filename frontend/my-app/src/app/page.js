@@ -24,12 +24,15 @@ const App = () => {
       }, []);
 
     return (
-        <><Head><meta name="viewport" content="initial-scale=1, width=device-width" /></Head>
+      <>
+        <Head>
+          <meta name="viewport" content="initial-scale=1, width=device-width" />
+        </Head>
 
-<Script
-        src="https://d23jutsnau9x47.cloudfront.net/back/v1.0.9/viewer.js"
-        data-who="💎 Made with naker.io 💎"
-        data-option={`{
+        <Script
+          src="https://d23jutsnau9x47.cloudfront.net/back/v1.0.9/viewer.js"
+          data-who="💎 Made with naker.io 💎"
+          data-option={`{
           "environment": {
             "gradient": "horizontal",
             "sensitivity": 1,
@@ -50,45 +53,52 @@ const App = () => {
           },
           "waterMark": false
         }`}
-        strategy="afterInteractive"
-      />
+          strategy="afterInteractive"
+        />
 
         <div className={styles.page}>
-                <h1 ><Typewriter
-    words={['Welcome to StudyHive!']}
-    typeSpeed={40}
-    deleteSpeed={0}
-    delaySpeed={1000000} // never delete
-  /></h1>
-                <br></br>
+          <h1>
+            <Typewriter
+              words={["Welcome to StudyHive!"]}
+              typeSpeed={40}
+              deleteSpeed={0}
+              delaySpeed={1000000} // never delete
+            />
+          </h1>
+          <br></br>
 
-                {showSecondLine && (
-                <h3><Typewriter
-    words={['Your app to find friends in class, check out course materials and build community!']}
-    typeSpeed={40}
-    deleteSpeed={0}
-    delaySpeed={1000000} // never delete
-  /></h3>)}
+          {showSecondLine && (
+            <h3>
+              <Typewriter
+                words={[
+                  "Your app to find friends in class, check out course materials and build community!",
+                ]}
+                typeSpeed={40}
+                deleteSpeed={0}
+                delaySpeed={1000000} // never delete
+              />
+            </h3>
+          )}
 
-                <div style={{ marginTop: "20px" }}>
-                    <Button variant="contained"
-                        onClick={() => router.push('/registerUser')}
-                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
-                    >
-                        Register
-                    </Button>
+          <div style={{ marginTop: "20px" }}>
+            <Button
+              variant="contained"
+              onClick={() => router.push("/registerUser")}
+              style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
+            >
+              Register
+            </Button>
 
-                    <Button variant="contained"
-                        onClick={() => router.push('/login-page')}
-                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
-                    >
-                        Login
-                    </Button>
-                </div>
-            </div>
-
-            </>
-            
+            <Button
+              variant="contained"
+              onClick={() => router.push("/login-page")}
+              style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
+            >
+              Login
+            </Button>
+          </div>
+        </div>
+      </>
     );
 };
 
