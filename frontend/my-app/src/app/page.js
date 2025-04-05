@@ -1,43 +1,32 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import socketClient  from "socket.io-client";
 import Button from '@mui/material/Button';
 import Head from 'next/head';
 import Script from 'next/script';
+import styles from './page.module.css';
+import { Typewriter } from 'react-simple-typewriter';
 
 
 const App = () => {
     
     const router = useRouter();
+    const [showSecondLine, setShowSecondLine] = useState(false);
+    useEffect(() => {
+        const delay = 'Welcome to StudyHive!'.length * 40 + 500; // characters x typeSpeed + a little buffer
+        const timeout = setTimeout(() => {
+          setShowSecondLine(true);
+        }, delay);
+    
+        return () => clearTimeout(timeout);
+      }, []);
 
     return (
         <><Head><meta name="viewport" content="initial-scale=1, width=device-width" /></Head>
 
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", marginTop: "50px" }}>
-                <h1>Welcome to StudyHive</h1>
-                <br></br>
-                <h3>Your app to find friends in class, check out course materials and build community!</h3>
-
-                <div style={{ marginTop: "20px" }}>
-                    <Button variant="contained"
-                        onClick={() => router.push('/registerUser')}
-                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
-                    >
-                        Register
-                    </Button>
-
-                    <Button variant="contained"
-                        onClick={() => router.push('/login-page')}
-                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
-                    >
-                        Login
-                    </Button>
-                </div>
-            </div>
-
-            <Script
+<Script
         src="https://d23jutsnau9x47.cloudfront.net/back/v1.0.9/viewer.js"
         data-who="💎 Made with naker.io 💎"
         data-option={`{
@@ -63,6 +52,40 @@ const App = () => {
         }`}
         strategy="afterInteractive"
       />
+
+        <div className={styles.page}>
+                <h1 ><Typewriter
+    words={['Welcome to StudyHive!']}
+    typeSpeed={40}
+    deleteSpeed={0}
+    delaySpeed={1000000} // never delete
+  /></h1>
+                <br></br>
+
+                {showSecondLine && (
+                <h3><Typewriter
+    words={['Your app to find friends in class, check out course materials and build community!']}
+    typeSpeed={40}
+    deleteSpeed={0}
+    delaySpeed={1000000} // never delete
+  /></h3>)}
+
+                <div style={{ marginTop: "20px" }}>
+                    <Button variant="contained"
+                        onClick={() => router.push('/registerUser')}
+                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
+                    >
+                        Register
+                    </Button>
+
+                    <Button variant="contained"
+                        onClick={() => router.push('/login-page')}
+                        style={{ padding: "10px 20px", margin: "10px", fontSize: "16px" }}
+                    >
+                        Login
+                    </Button>
+                </div>
+            </div>
 
             </>
             
